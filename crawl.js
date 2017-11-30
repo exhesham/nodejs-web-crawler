@@ -117,13 +117,12 @@ function convert_relevant_product_doms_to_json(dom, section, category) {
 	}
 }
 
-function start_scanning(section, category, page, callback) {
+function start_category(section, category, page, callback) {
 	/*
 	* This function opens the category link and scan the page
 	* if the callback is not null, it calls the callback in order to get the maximum page number.
 	* the callback will call this method on the coming after pages.
 	* */
-
 	var options = {
 		host: 'kley-zemer.co.il',
 	}
@@ -141,6 +140,7 @@ function start_scanning(section, category, page, callback) {
 					for (var i in dom) {
 						convert_relevant_product_doms_to_json(dom[i], section, category);
 					}
+
 				}
 			});
 			var parser = new htmlparser.Parser(handler);
@@ -152,53 +152,10 @@ function start_scanning(section, category, page, callback) {
 	});
 	request.on('error', function (e) {
 
-		start_scanning(section, category, page, callback)
+		start_category(section, category, page, callback)
 	});
 	request.end();
 
-}
-
-
-function scan_categories() {
-	var options = {
-		host: 'kley-zemer.co.il',
-		headers: {'Content-Type': 'text/html; Charset=Windows-1255'}
-	}
-	var request = http.request(options, function (res) {
-		var data = '';
-		res.on('data', function (chunk) {
-			data += chunk;
-			//console.log('data:', data);
-		});
-		res.on('end', function () {
-			var rawHtml = data;//iconv.decode(data, "ISO-8859-6");;
-			var capture_num = false;
-			var pages = []
-			var htmlparser = require("htmlparser2");
-			var parser = new htmlparser.Parser({
-					onopentag: function (name, attribs, a) {
-						if (name === "a" && attribs.class == 'sidebarItem') {
-							categories_ids[attribs.title] = {'path': attribs.href}
-						}
-					}, onclosetag: function (tagname) {
-						if (tagname === "body") {
-							console.log(categories_ids)
-						}
-					}
-				},
-				{decodeEntities: true});
-			parser.write(data);
-			parser.end(function () {
-				console.log('pages', pages)
-			});
-
-		});
-	});
-	request.on('error', function (e) {
-
-		start_scanning(path, category, callback)
-	});
-	request.end();
 }
 
 
@@ -207,7 +164,7 @@ function scan_category_pages(section, category, number) {
 		number = 1
 	}
 	for (var i = number; i < category.pages + 1; i++) {
-		start_scanning(section, category, i, null);
+		start_category(section, category, i, null);
 	}
 }
 
@@ -243,5 +200,5 @@ function get_pages_number_from_first_page(data, section, category) {
 
 for (var i in categories['guitars'].categories) {
 	var category = categories['guitars'].categories[i];
-	start_scanning('guitars', category, 1, get_pages_number_from_first_page)
+	start_category('guitars', category, 1, get_pages_number_from_first_page)
 }
