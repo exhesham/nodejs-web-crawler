@@ -1,34 +1,48 @@
 /**
  * Created by hishamy on 30/11/2017.
  */
-
 var http = require('http');
 var htmlparser = require("htmlparser");
-// var iconv = require('iconv');
 
+
+var all_products = []   // this array will hold all the products mentioned in the categories
+
+var categories = {
+	'guitars': {
+		'path': '/?Section=2',
+		'pages': 1,
+		'categories': [
+			{'name': 'classical guitars', 'path': '/?Category=59'},
+			{'name': 'accoustic guitars', 'path': '/?Category=60'},
+			{'name': 'electric guitars', 'path': '/?Category=51'},
+			{'name': 'bass guitars', 'path': '/?Category=53'},
+			{'name': 'mandoline and banjos', 'path': '/?Category=168'},
+			{'name': 'ukulili', 'path': '/?Category=169'},
+			{'name': 'amplifiers', 'path': '/?Category=105'},
+			{'name': 'effects', 'path': '/?Category=63'},
+			{'name': 'strings', 'path': '/?Category=65'},
+			{'name': 'cases', 'path': '/?Category=170'},
+			{'name': 'others', 'path': '/?Category=64'},
+			{'name': 'pickups', 'path': '/?Category=66'},
+		]
+	},
+}
 
 
 var desired_dom_attrs = {
+	/*These are the attrs that represent a single product */
 	'class': 'ProductDisplayStyle2'
 }
 
-var dom_to_json_attrs = [
-	{
-		'json-key': 'product-name',
-		'dom-identifiers': {
-			'class': ''
-		}
 
-	}
-]
-
-function get_product_json(product_span) {
-	// receives a span that include the product details and return a json
-	if(!product_span || !product_span.children){
+function get_product_json(product_span, section, category) {
+	/* receives a span that include the product details and return a json
+	* */
+	if (!product_span || !product_span.children) {
 		return;
 	}
 	var product_url = product_span.children[1].attribs['onclick']
-	var product_id = product_url.replace('location.href=\'product.asp?product=','').replace("';",'')
+	var product_id = product_url.replace('location.href=\'product.asp?product=', '').replace("';", '')
 	var subdoms = product_span.children[1].children
 	var product_name = subdoms[1].raw
 
@@ -37,57 +51,83 @@ function get_product_json(product_span) {
 	var product_price1;
 	var product_price2;
 	var product_img_url;
-	try{product_price1 = subdoms[7].children[1].children[0].data.replace(',','');}catch(e) {}
-	try{product_price2= subdoms[9].children[1].children[0].data.replace(',','');}catch(e) {}
-	try{product_img_url = subdoms[3].children[1].children[1].children[1].children[0].attribs['src']}catch(e) {}
-	try{product_price1 = price_regex.exec(product_price1)[0];}catch(e) {}
-	try{product_price2 = price_regex.exec(product_price2)[0];}catch(e) {}
-
-
+	try {
+		product_price1 = subdoms[7].children[1].children[0].data.replace(',', '');
+	} catch (e) {
+	}
+	try {
+		product_price2 = subdoms[9].children[1].children[0].data.replace(',', '');
+	} catch (e) {
+	}
+	try {
+		product_img_url = subdoms[3].children[1].children[1].children[1].children[0].attribs['src']
+	} catch (e) {
+	}
+	try {
+		product_price1 = price_regex.exec(product_price1)[0];
+	} catch (e) {
+	}
+	try {
+		product_price2 = price_regex.exec(product_price2)[0];
+	} catch (e) {
+	}
 	return {
 		'product-url': product_url,
 		'img-url': product_img_url,
+		'category': category.name,
+		'section': section,
 		'id': product_id,
 		'name': product_name,
 		'price-1': product_price1,
 		'price-2': product_price2,
 	};
-
-
 }
 
 function is_desired_dom(dom) {
-	if(!dom || !dom.attribs){
+	/*
+	* Check if the received dom does represent a single product
+	* */
+	if (!dom || !dom.attribs) {
 		return false;
 	}
-	for(var key in desired_dom_attrs){
-		if(dom.attribs[key] != desired_dom_attrs[key]){
+	for (var key in desired_dom_attrs) {
+		if (dom.attribs[key] != desired_dom_attrs[key]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-function scan_data(dom) {
-    var children = dom.children
-    for(var i in children){
+function convert_relevant_product_doms_to_json(dom, section, category) {
+	/*
+	* This function will receive the whole page dom and start scanning it for relevant doms.
+	* the relevant doms will be parsed and converted to json
+	* */
+	var children = dom.children
+	for (var i in children) {
 
-        if(children[i].name == 'span' && children[i].type == 'tag'){
-            if(is_desired_dom(children[i]) ){
-				console.log(get_product_json(children[i]));
-            }
-        }else{
-	        scan_data(children[i]);
-        }
+		if (children[i].name == 'span' && children[i].type == 'tag') {
+			if (is_desired_dom(children[i])) {
+				all_products.push(get_product_json(children[i], section, category));
+			}
+		} else {
+			convert_relevant_product_doms_to_json(children[i], section, category);
+		}
 
-    }
+	}
 }
 
-function start_scanning(path,category, callback) {
+function start_scanning(section, category, page, callback) {
+	/*
+	* This function opens the category link and scan the page
+	* if the callback is not null, it calls the callback in order to get the maximum page number.
+	* the callback will call this method on the coming after pages.
+	* */
+
 	var options = {
 		host: 'kley-zemer.co.il',
 	}
-	options.path = path;
+	options.path = category.path + '&Page=' + page;
 	var request = http.request(options, function (res) {
 		var data = '';
 		res.on('data', function (chunk) {
@@ -97,34 +137,32 @@ function start_scanning(path,category, callback) {
 		res.on('end', function () {
 			var rawHtml = data;
 			var handler = new htmlparser.DefaultHandler(function (error, dom) {
-				if (error){
-
-				}else {
-
+				if (!error) {
 					for (var i in dom) {
-						scan_data(dom[i]);
+						convert_relevant_product_doms_to_json(dom[i], section, category);
 					}
-
 				}
 			});
 			var parser = new htmlparser.Parser(handler);
-			parser.parseComplete(rawHtml,category);
-			if(callback != null){
-				callback(rawHtml, category)
+			parser.parseComplete(rawHtml, category);
+			if (callback != null) {
+				callback(rawHtml, section, category)
 			}
 		});
 	});
 	request.on('error', function (e) {
 
-		start_scanning(path,category, callback)
+		start_scanning(section, category, page, callback)
 	});
 	request.end();
+
 }
 
-function scan_categories(){
+
+function scan_categories() {
 	var options = {
 		host: 'kley-zemer.co.il',
-		headers: {'Content-Type':'text/html; Charset=Windows-1255'}
+		headers: {'Content-Type': 'text/html; Charset=Windows-1255'}
 	}
 	var request = http.request(options, function (res) {
 		var data = '';
@@ -138,16 +176,16 @@ function scan_categories(){
 			var pages = []
 			var htmlparser = require("htmlparser2");
 			var parser = new htmlparser.Parser({
-				onopentag: function(name, attribs, a){
-					if(name === "a" && attribs.class=='sidebarItem'){
-						categories_ids[attribs.title] = {'path':attribs.href}
-					}
-				},onclosetag: function(tagname){
-						if(tagname === "body"){
+					onopentag: function (name, attribs, a) {
+						if (name === "a" && attribs.class == 'sidebarItem') {
+							categories_ids[attribs.title] = {'path': attribs.href}
+						}
+					}, onclosetag: function (tagname) {
+						if (tagname === "body") {
 							console.log(categories_ids)
 						}
 					}
-			},
+				},
 				{decodeEntities: true});
 			parser.write(data);
 			parser.end(function () {
@@ -158,66 +196,43 @@ function scan_categories(){
 	});
 	request.on('error', function (e) {
 
-		start_scanning(path,category, callback)
+		start_scanning(path, category, callback)
 	});
 	request.end();
 }
-categories_ids = {
-
-}
-categories = {
-	'guitars':{'path': '/?Section=2',
-				'pages': 1,
-				'categories':[
-					{'name': 'classical guitars', 'path':'Category=59'},
-					{'name': 'accoustic guitars', 'path':'Category=60'},
-					{'name': 'electric guitars', 'path':'Category=51'},
-					{'name': 'bass guitars', 'path':'Category=53'},
-					{'name': 'mandoline and banjos', 'path':'Category=168'},
-					{'name': 'ukulili', 'path':'Category=169'},
-					{'name': 'amplifiers', 'path':'Category=105'},
-					{'name': 'effects', 'path':'Category=63'},
-					{'name': 'strings', 'path':'Category=65'},
-					{'name': 'cases', 'path':'Category=170'},
-					{'name': 'others', 'path':'Category=64'},
-					{'name': 'pickups', 'path':'Category=66'},
-				]
-	},
-
-}
 
 
-
-function scan_category_pages(category, number) {
-	if (!number){
+function scan_category_pages(section, category, number) {
+	if (!number) {
 		number = 1
 	}
-	for(var i = number;i< categories[category].pages+1;i++){
-		start_scanning(categories[category].path+'&Page='+i,category,null);
+	for (var i = number; i < category.pages + 1; i++) {
+		start_scanning(section, category, i, null);
 	}
 }
 
-function get_pages_number_from_first_page(data, category){
+function get_pages_number_from_first_page(data, section, category) {
 	var capture_num = false;
 	var pages = []
 	var htmlparser = require("htmlparser2");
 	var parser = new htmlparser.Parser({
-		onopentag: function(name, attribs, a){
-			if(name === "span" && attribs.class.indexOf("paging OtherPage")>0){
+		onopentag: function (name, attribs, a) {
+			if (name === "span" && attribs.class.indexOf("paging OtherPage") > 0) {
 				capture_num = true;
 			}
 		},
-		ontext: function(text){
-			if(capture_num){
+		ontext: function (text) {
+			if (capture_num) {
 				pages.push(text)
-				categories[category].pages = text > categories[category].pages? text: categories[category].pages
+				var curr_pages = categories[section].categories[category].pages
+				categories[section].categories[category].pages = text > curr_pages ? text : curr_pages;
 				capture_num = false
 			}
 
 		},
-		onclosetag: function(tagname){
-			if(tagname === "body"){
-				scan_category_pages(category, 2)
+		onclosetag: function (tagname) {
+			if (tagname === "body") {
+				scan_category_pages(section, category, 2)
 			}
 		}
 	}, {decodeEntities: true});
@@ -225,6 +240,8 @@ function get_pages_number_from_first_page(data, category){
 	parser.end();
 }
 
-//scan_categories()
-//console.log(categories_ids)
-start_scanning(categories['guitars'].path,'guitars',get_pages_number_from_first_page)
+
+for (var i in categories['guitars'].categories) {
+	var category = categories['guitars'].categories[i];
+	start_scanning('guitars', category, 1, get_pages_number_from_first_page)
+}
