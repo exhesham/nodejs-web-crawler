@@ -117,7 +117,7 @@ function convert_relevant_product_doms_to_json(dom, section, category) {
 	}
 }
 
-function start_category(section, category, page, callback) {
+function start_category_scan(section, category, page, callback) {
 	/*
 	* This function opens the category link and scan the page
 	* if the callback is not null, it calls the callback in order to get the maximum page number.
@@ -151,8 +151,8 @@ function start_category(section, category, page, callback) {
 		});
 	});
 	request.on('error', function (e) {
-
-		start_category(section, category, page, callback)
+		// retry on failure
+		start_category_scan(section, category, page, callback)
 	});
 	request.end();
 
@@ -164,7 +164,7 @@ function scan_category_pages(section, category, number) {
 		number = 1
 	}
 	for (var i = number; i < category.pages + 1; i++) {
-		start_category(section, category, i, null);
+		start_category_scan(section, category, i, null);
 	}
 }
 
@@ -200,5 +200,5 @@ function get_pages_number_from_first_page(data, section, category) {
 
 for (var i in categories['guitars'].categories) {
 	var category = categories['guitars'].categories[i];
-	start_category('guitars', category, 1, get_pages_number_from_first_page)
+	start_category_scan('guitars', category, 1, get_pages_number_from_first_page)
 }
