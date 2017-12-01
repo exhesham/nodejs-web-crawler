@@ -242,39 +242,32 @@ function crawl_data(section_name, category_name, page, get_all_data){
  * this function will scan all the sections and save it to file named [section_name]_data.json.
  */
 function scan_and_save(){
-
 	var async_promises = []
-	for(var category_name in categories){
-		for (var i in categories[category_name].categories) {
-			var category = categories[category_name].categories[i];
-			async_promises.push(start_category_scan(category_name, category, 1, get_pages_number_from_first_page));
+	for(var section_name in categories){
+		for (var i in categories[section_name].categories) {
+			var category = categories[section_name].categories[i];
+			async_promises.push(start_category_scan(section_name, category, 1, get_pages_number_from_first_page));
 		}
 	}
 	Promise.all(async_promises).then(function() {
-
-		for(var key in all_products[section_name]){
-			console.log(key,':', all_products[section_name][key].length)
+		// print stats
+		for(var section_name in categories) {
+			for (var key in all_products[section_name]) {
+				console.log(key, ':', all_products[section_name][key].length)
+			}
+			// save section to file
+			var file = section_name + '_data.json'
+			var obj = all_products[section_name]
+			console.log('saving file', file)
+			jsonfile.writeFile(file, obj, function (err) {
+				console.error(err)
+				console.log('finished saving file: ', file)
+			})
 		}
-		var file = section_name + '_data.json'
-		var obj = all_products[section_name]
-		console.log('saving file', file)
-		jsonfile.writeFile(file, obj, function (err) {
-			console.error(err)
-			console.log('finished saving file: ', file)
-		})
-
 	}, function(e) {
 		console.log('error ', e)
 	});
 }
-
-//
-// // scan all categories
-// for(var category_name in categories) {
-// 	exports.scan_and_save(category_name)
-// }
-//
-
 
 exports.categories = categories;
 exports.scan_and_save = scan_and_save;
