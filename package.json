@@ -16,6 +16,7 @@
     "iconv": "^2.3.0",
     "jade": "~1.11.0",
     "jsdom": "^11.5.1",
+    "jsonfile": "^4.0.0",
     "morgan": "~1.9.0",
     "serve-favicon": "~2.4.5"
   }
