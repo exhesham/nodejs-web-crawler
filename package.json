@@ -1,7 +1,9 @@
 {
-  "name": "untitled1",
-  "version": "0.0.0",
-  "private": true,
+  "name": "kz-crawler",
+  "version": "1.0.0",
+  "private": false,
+  "author": "exhesham",
+  "repository": "https://github.com/exhesham/nodejs-web-crawler",
   "scripts": {
     "start": "node ./bin/www"
   },
@@ -9,11 +11,6 @@
     "htmlparser": "^1.7.7",
     "htmlparser2": "^3.9.2",
     "http": "0.0.0",
-    "iconv": "^2.3.0",
-    "jade": "~1.11.0",
-    "jsdom": "^11.5.1",
-    "jsonfile": "^4.0.0",
-    "morgan": "~1.9.0",
-    "serve-favicon": "~2.4.5"
+    "jsdom": "^11.5.1"
   }
 }

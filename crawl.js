@@ -237,7 +237,6 @@ function crawl_data(section_name, category_name, page, get_all_data){
 	return Promise.all(async_promises);
 }
 
-
 /***
  * this function will scan all the sections and save it to file named [section_name]_data.json.
  */
@@ -272,3 +271,4 @@ function scan_and_save(){
 exports.categories = categories;
 exports.scan_and_save = scan_and_save;
 exports.crawl_data = crawl_data;
+exports.desired_dom_attrs = desired_dom_attrs;
