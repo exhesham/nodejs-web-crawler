@@ -1,11 +1,11 @@
 /**
- * Created by hishamy on 30/11/2017.
+ * Created by exhesham on 30/11/2017.
  */
 var http = require('http');
 var htmlparser = require("htmlparser");
-var jsonfile = require('jsonfile')
+var htmlparser2 = require("htmlparser2");
+var jsonfile = require('jsonfile');
 
-var all_products = []   // this array will hold all the products mentioned in the categories
 
 var categories = {
 	'guitars': {
@@ -28,50 +28,42 @@ var categories = {
 	},
 }
 
+var all_products = []   // this array will hold all the products mentioned in the categories
 
 var desired_dom_attrs = {
 	/*These are the attrs that represent a single product */
 	'class': 'ProductDisplayStyle2'
 }
 
+function get_number(str){
+	var price_regex = new RegExp('([0-9]+)', 'g');
+	var found_number = str.replace(',', ''); // if the number has commas...
+	try {
+		found_number = price_regex.exec(found_number)[0];
+	} catch (e) {
+		found_number = null;
+	}
+	return found_number
+}
 
 function get_product_json(product_span, section, category) {
 	/* receives a span that include the product details and return a json
 	* */
+
 	if (!product_span || !product_span.children) {
 		return;
 	}
+	var product_img_url;
 	var product_url = product_span.children[1].attribs['onclick']
 	var product_id = product_url.replace('location.href=\'product.asp?product=', '').replace("';", '')
 	var subdoms = product_span.children[1].children
 	var product_name = subdoms[1].raw
-
-	var price_regex = new RegExp('([0-9]+)', 'g');
-
-	var product_price1;
-	var product_price2;
-	var product_img_url;
-	try {
-		product_price1 = subdoms[7].children[1].children[0].data.replace(',', '');
-	} catch (e) {}
-	try {
-		product_price2 = subdoms[9].children[1].children[0].data.replace(',', '');
-	} catch (e) {}
+	var product_price1 = get_number(subdoms[7].children[1].children[0].data)
+	var product_price2 = get_number(subdoms[9].children[1].children[0].data)
 	try {
 		product_img_url = subdoms[3].children[1].children[1].children[1].children[0].attribs['src']
-	} catch (e) {
+	} catch (e) {}
 
-	}
-	try {
-		product_price1 = price_regex.exec(product_price1)[0];
-	} catch (e) {
-		product_price1 = null
-	}
-	try {
-		product_price2 = price_regex.exec(product_price2)[0];
-	} catch (e) {
-		product_price2 = null
-	}
 	return {
 		'product-url': product_url,
 		'img-url': product_img_url,
@@ -87,6 +79,7 @@ function get_product_json(product_span, section, category) {
 function is_desired_dom(dom) {
 	/*
 	* Check if the received dom does represent a single product
+	* according to the variable desired_dom_attrs
 	* */
 	if (!dom || !dom.attribs) {
 		return false;
@@ -168,14 +161,19 @@ function start_category_scan(section, category, page, callback) {
 	});
 }
 
-
-function scan_category_pages(section, category, number) {
-	if (!number) {
-		number = 1
+/**
+ * This function will receive the maximum start_page_number of pages per category and then will scan all these pages
+ * @param section
+ * @param category a category json that represents a category. the json contains name and pages and url at least
+ * @param start_page_number
+ * @returns a promise object for all the pages to be scanned
+ */
+function scan_category_pages(section, category, start_page_number) {
+	if (!start_page_number) {
+		start_page_number = 1;
 	}
 	var async_promises = []
-
-	for (var i = number; i < category.pages + 1; i++) {
+	for (var i = start_page_number; i < category.pages + 1; i++) {
 		async_promises.push(start_category_scan(section, category, i, null));
 	}
 	return Promise.all(async_promises)
@@ -183,10 +181,8 @@ function scan_category_pages(section, category, number) {
 
 function get_pages_number_from_first_page(data, section, category) {
 	var capture_num = false;
-
-	var htmlparser = require("htmlparser2");
 	return new Promise(function (resolve, reject) {
-		var parser = new htmlparser.Parser({
+		var parser = new htmlparser2.Parser({
 			onopentag: function (name, attribs, a) {
 				if (name === "span" && attribs.class.indexOf("paging OtherPage") >= 0) {
 					capture_num = true;
@@ -212,24 +208,74 @@ function get_pages_number_from_first_page(data, section, category) {
 	});
 }
 
-var async_promises = []
-for (var i in categories['guitars'].categories) {
-	var category = categories['guitars'].categories[i];
-	async_promises.push(start_category_scan('guitars', category, 1, get_pages_number_from_first_page));
-}
-Promise.all(async_promises).then(function() {
-
-	for(var key in all_products['guitars']){
-		console.log(key,':', all_products['guitars'][key].length)
+/**
+ * Crawl data for specific category. if category is null, then will scan all the categories
+ * @param section_name the section name that referenece the category
+ * @param category_name the category name to scan. if the category name is null then will scan all the categories under the section name
+ * @param page the page number to scan. if the page number is undefined, then will start scanning from page = 1
+ * @param get_all_data boolean parameter. if true, then will scan all the pages after page too. otherwise, will scan only the referenced page.
+ * @returns {promise}
+ */
+function crawl_data(section_name, category_name, page, get_all_data){
+	if(!section_name || ! section_name in categories){
+		return null;
 	}
-	var file = 'guitars_data.json'
-	var obj = all_products['guitars']
-	console.log('saving file', file)
-	jsonfile.writeFile(file, obj, function (err) {
-		console.error(err)
-		console.log('finished saving file: ', file)
-	})
+	if (! page ){
+		page = 1;
+	}
 
-}, function(e) {
-	console.log('error ', e)
-});
+	var async_promises = [];
+	if(!category_name){
+		// in this case we will scan all the categories of the section and return the represented data.
+		for(var category_name in categories[section_name]){
+			for (var i in categories[category_name].categories) {
+				var category = categories[category_name].categories[i];
+				async_promises.push(start_category_scan(section_name, category, page, get_all_data? get_pages_number_from_first_page: null));
+			}
+		}
+	}
+	return Promise.all(async_promises);
+}
+
+
+/***
+ * this function will scan all the sections and save it to file named [section_name]_data.json.
+ */
+function scan_and_save(){
+
+	var async_promises = []
+	for(var category_name in categories){
+		for (var i in categories[category_name].categories) {
+			var category = categories[category_name].categories[i];
+			async_promises.push(start_category_scan(category_name, category, 1, get_pages_number_from_first_page));
+		}
+	}
+	Promise.all(async_promises).then(function() {
+
+		for(var key in all_products[section_name]){
+			console.log(key,':', all_products[section_name][key].length)
+		}
+		var file = section_name + '_data.json'
+		var obj = all_products[section_name]
+		console.log('saving file', file)
+		jsonfile.writeFile(file, obj, function (err) {
+			console.error(err)
+			console.log('finished saving file: ', file)
+		})
+
+	}, function(e) {
+		console.log('error ', e)
+	});
+}
+
+//
+// // scan all categories
+// for(var category_name in categories) {
+// 	exports.scan_and_save(category_name)
+// }
+//
+
+
+exports.categories = categories;
+exports.scan_and_save = scan_and_save;
+exports.crawl_data = crawl_data;
