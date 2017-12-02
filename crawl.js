@@ -35,7 +35,7 @@ var desired_dom_attrs = {
 	'class': 'ProductDisplayStyle2'
 }
 
-function get_number(str){
+function get_number(str) {
 	var price_regex = new RegExp('([0-9]+)', 'g');
 	var found_number = str.replace(',', ''); // if the number has commas...
 	try {
@@ -62,7 +62,8 @@ function get_product_json(product_span, section, category) {
 	var product_price2 = get_number(subdoms[9].children[1].children[0].data)
 	try {
 		product_img_url = subdoms[3].children[1].children[1].children[1].children[0].attribs['src']
-	} catch (e) {}
+	} catch (e) {
+	}
 
 	return {
 		'product-url': product_url,
@@ -102,10 +103,10 @@ function convert_relevant_product_doms_to_json(dom, section, category) {
 
 		if (children[i].name == 'span' && children[i].type == 'tag') {
 			if (is_desired_dom(children[i])) {
-				if(!all_products[section]){
+				if (!all_products[section]) {
 					all_products[section] = {};
 				}
-				if(!all_products[section][category.name]){
+				if (!all_products[section][category.name]) {
 					all_products[section][category.name] = [];
 				}
 				all_products[section][category.name].push(get_product_json(children[i], section, category));
@@ -125,16 +126,18 @@ function start_category_scan(section, category, page, callback) {
 	* */
 	return new Promise(function (resolve, reject) {
 		var options = {
-			host: this.parent_url,
+			host: parent_url,
+			port: 80,
 		}
 		options.path = category.path + '&Page=' + page;
+
 		var request = http.request(options, function (res) {
 			var data = '';
 			res.on('data', function (chunk) {
 				data += chunk;
-				//console.log('data:', data);
 			});
 			res.on('end', function () {
+				console.log('finished importing page')
 				var rawHtml = data;
 				var handler = new htmlparser.DefaultHandler(function (error, dom) {
 					if (!error) {
@@ -148,14 +151,15 @@ function start_category_scan(section, category, page, callback) {
 				parser.parseComplete(rawHtml, category);
 				if (callback != null) {
 					callback(rawHtml, section, category).then(resolve).catch(reject)
-				}else{
-					resolve();
+				} else {
+					resolve(all_products);
 				}
 			});
 		});
 		request.on('error', function (e) {
-			// retry on failure
-			start_category_scan(section, category, page, callback)
+			// TODO: retry on failure
+			reject(e);
+			//start_category_scan(section, category, page, callback)
 		});
 		request.end();
 	});
@@ -216,41 +220,52 @@ function get_pages_number_from_first_page(data, section, category) {
  * @param get_all_data boolean parameter. if true, then will scan all the pages after page too. otherwise, will scan only the referenced page.
  * @returns {promise}
  */
-function crawl_data(section_name, category_name, page, get_all_data){
-	if(!section_name || ! section_name in categories){
+function crawl_data(section_name, category_name, page, get_all_data) {
+	if (!section_name || !section_name in categories) {
 		return null;
 	}
-	if (! page ){
+	if (!page) {
 		page = 1;
 	}
 
 	var async_promises = [];
-	if(!category_name){
+	if (!category_name) {
 		// in this case we will scan all the categories of the section and return the represented data.
-		for(var category_name in categories[section_name]){
-			for (var i in categories[category_name].categories) {
-				var category = categories[category_name].categories[i];
-				async_promises.push(start_category_scan(section_name, category, page, get_all_data? get_pages_number_from_first_page: null));
+		for (var i in categories[section_name].categories) {
+			var category =  categories[section_name].categories[i];
+			async_promises.push(start_category_scan(section_name, category, page, get_all_data ? get_pages_number_from_first_page : null));
+		}
+		return Promise.all(async_promises);
+	} else {
+		var found_category = null;
+		for (var i in categories[section_name].categories) {
+			if(categories[section_name].categories[i].name == category_name){
+				found_category = categories[section_name].categories[i];
+				break;
 			}
 		}
+		if(!found_category){
+			throw 'no such a category name: ' + category_name;
+		}else{
+			return start_category_scan(section_name, found_category, page, get_all_data ? get_pages_number_from_first_page : null)
+		}
 	}
-	return Promise.all(async_promises);
 }
 
 /***
  * this function will scan all the sections and save it to file named [section_name]_data.json.
  */
-function scan_and_save(){
+function scan_and_save() {
 	var async_promises = []
-	for(var section_name in categories){
+	for (var section_name in categories) {
 		for (var i in categories[section_name].categories) {
 			var category = categories[section_name].categories[i];
 			async_promises.push(start_category_scan(section_name, category, 1, get_pages_number_from_first_page));
 		}
 	}
-	Promise.all(async_promises).then(function() {
+	Promise.all(async_promises).then(function () {
 		// print stats
-		for(var section_name in categories) {
+		for (var section_name in categories) {
 			for (var key in all_products[section_name]) {
 				console.log(key, ':', all_products[section_name][key].length)
 			}
@@ -263,7 +278,7 @@ function scan_and_save(){
 				console.log('finished saving file: ', file)
 			})
 		}
-	}, function(e) {
+	}, function (e) {
 		console.log('error ', e)
 	});
 }

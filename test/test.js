@@ -1,69 +1,53 @@
 var crawl = require('../crawl');
 var assert = require('assert');
 var http = require('http');
-var httpRequest = {
-	get: url => {
-	return (new Promise(function(resolve, reject) {
-		http.get(url, res => {
-			resolve(res);
+
+var reqp = require('./request-promise');
+
+describe('tests categories:', function() {
+	it('section correct', function() {
+		var url = {
+			'host': crawl.parent_url,
+			'path': crawl.categories['guitars'].path,
+			'port': 80
+		}
+		return reqp.get(url).then(function(res) {
+			assert.equal(200, res.statusCode);
+		})
 	});
-	}));
-}
-};
-
-
-describe('categories', function() {
-	describe('categories paths', function() {
-		it('sections should return 200', function(done) {
-			this.timeout(500);
-			setTimeout(done, 300);
-			for(var section in crawl.categories){
-				var request = http.request({
+	it('section correct', function() {
+		this.timeout(4000);
+		var all_promises = []
+		for(var section in crawl.categories){
+			for(var i in crawl.categories[section].categories) {
+				var url = {
 					'host': crawl.parent_url,
-					'path': crawl.categories[section].path,
-					'port':80
-				}, function (res) {
-					res.on('end', function () {
-						assert.equal(200, res.statusCode);
-						done();
-					});
-				});
-
-				request.on('error', function (e) {
-					assert.fail(e)
-				});
-				request.end();
-			}
-		});
-
-
-		it('categories should return 200', function(done) {
-			this.timeout(500);
-			setTimeout(done, 300);
-			for(var section in crawl.categories){
-
-				for(var i in crawl.categories[section].categories) {
-
-					var category = crawl.categories[section].categories[i];
-					var url = crawl.parent_url + category.path;
-
-					var request = http.request({
-						'host': crawl.parent_url,
-						'path': category.path,
-						'port':80
-					}, function (res) {
-						res.on('end', function () {
-							assert.equal(200, res.statusCode);
-							console.log(category)
-							done();
-						});
-					});
-					request.on('error', function (e) {
-						assert.fail(e)
-					});
-					request.end();
+					'path': crawl.categories['guitars'].path,
+					'port': 80
 				}
+				all_promises.push(reqp.get(url));
 			}
-		});
+		}
+
+		return Promise.all(all_promises).then(function(res) {
+			// assert.equal(200, res.statusCode);
+		})
+	});
+});
+
+
+describe('tests returned category data format:', function() {
+	this.timeout(110000);
+	it('single section category', function() {
+		var category = crawl.categories['guitars'].categories[0].name;
+		return crawl.crawl_data('guitars',category,1,false).then(function(res) {
+			console.log(res)
+
+			assert.equal(Object.keys(res).length, 1);
+			assert.equal(Object.keys(res['guitars']).length, 1);
+			assert.equal(res['guitars'][category].length > 1, true);
+
+
+		})
 	});
 });
