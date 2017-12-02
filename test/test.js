@@ -37,7 +37,7 @@ describe('tests categories:', function() {
 
 
 describe('tests returned category data format:', function() {
-	this.timeout(4000);
+	this.timeout(14000);
 	it('single section category', function() {
 		var category = crawl.categories['guitars'].categories[0].name;
 		return crawl.crawl_data('guitars',category,1,false).then(function(res) {
@@ -55,6 +55,21 @@ describe('tests returned category data format:', function() {
 					assert.equal(Object.keys(res_second_page['guitars']).length, 1);
 					assert.equal(res_second_page['guitars'][category].length,
 						res_first_page['guitars'][category].length);
+					resolve()
+				}).catch(reject)
+			}).catch(reject)
+		}).then(function (value) {});
+
+	});
+	it('single category  1 page vs all test', function() {
+		var category = crawl.categories['guitars'].categories[0].name;
+		return new Promise(function (resolve, reject) {
+			crawl.crawl_data('guitars',category,1,false).then(function(res_first_page) {
+				crawl.crawl_data('guitars',category,1,true).then(function(res_second_page) {
+					console.log(res_second_page)
+					assert.equal(Object.keys(res_second_page).length, 1);
+					assert.equal(Object.keys(res_second_page['guitars']).length, 1);
+					assert.equal(res_first_page['guitars'][category].length < res_second_page['guitars'][category].length,true);
 					resolve()
 				}).catch(reject)
 			}).catch(reject)

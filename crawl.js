@@ -143,7 +143,6 @@ function start_category_scan(section, category, page, callback) {
 						for (var i in dom) {
 							convert_relevant_product_doms_to_json(dom[i], section, category);
 						}
-
 					}
 				});
 				var parser = new htmlparser.Parser(handler);
@@ -282,8 +281,8 @@ function scan_and_save() {
 	});
 }
 
-exports.parent_url = parent_url;
-exports.categories = categories;
+exports.parent_url = parent_url;        // tested
+exports.categories = categories;        // tested
 exports.scan_and_save = scan_and_save;
-exports.crawl_data = crawl_data;
-exports.desired_dom_attrs = desired_dom_attrs;
+exports.crawl_data = crawl_data;        // partially tested - testing for single category
+exports.desired_dom_attrs = desired_dom_attrs;        // tested - covered by crawl_data
