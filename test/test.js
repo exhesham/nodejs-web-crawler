@@ -16,7 +16,7 @@ describe('tests categories:', function() {
 		})
 	});
 	it('section correct', function() {
-		this.timeout(4000);
+		this.timeout(6000);
 		var all_promises = []
 		for(var section in crawl.categories){
 			for(var i in crawl.categories[section].categories) {
@@ -37,12 +37,10 @@ describe('tests categories:', function() {
 
 
 describe('tests returned category data format:', function() {
-	this.timeout(110000);
+	this.timeout(4000);
 	it('single section category', function() {
 		var category = crawl.categories['guitars'].categories[0].name;
 		return crawl.crawl_data('guitars',category,1,false).then(function(res) {
-			console.log(res)
-
 			assert.equal(Object.keys(res).length, 1);
 			assert.equal(Object.keys(res['guitars']).length, 1);
 			assert.equal(res['guitars'][category].length > 1, true);
