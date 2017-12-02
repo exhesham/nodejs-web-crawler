@@ -29,7 +29,7 @@ var categories = {
 }
 
 var all_products = []   // this array will hold all the products mentioned in the categories
-
+var parent_url = 'kley-zemer.co.il';
 var desired_dom_attrs = {
 	/*These are the attrs that represent a single product */
 	'class': 'ProductDisplayStyle2'
@@ -125,7 +125,7 @@ function start_category_scan(section, category, page, callback) {
 	* */
 	return new Promise(function (resolve, reject) {
 		var options = {
-			host: 'kley-zemer.co.il',
+			host: this.parent_url,
 		}
 		options.path = category.path + '&Page=' + page;
 		var request = http.request(options, function (res) {
@@ -268,6 +268,7 @@ function scan_and_save(){
 	});
 }
 
+exports.parent_url = parent_url;
 exports.categories = categories;
 exports.scan_and_save = scan_and_save;
 exports.crawl_data = crawl_data;
