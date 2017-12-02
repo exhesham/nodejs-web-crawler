@@ -137,7 +137,6 @@ function start_category_scan(section, category, page, callback) {
 				data += chunk;
 			});
 			res.on('end', function () {
-				console.log('finished importing page')
 				var rawHtml = data;
 				var handler = new htmlparser.DefaultHandler(function (error, dom) {
 					if (!error) {

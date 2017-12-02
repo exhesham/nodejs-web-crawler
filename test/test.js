@@ -44,8 +44,21 @@ describe('tests returned category data format:', function() {
 			assert.equal(Object.keys(res).length, 1);
 			assert.equal(Object.keys(res['guitars']).length, 1);
 			assert.equal(res['guitars'][category].length > 1, true);
-
-
 		})
+	});
+	it('single category page test', function() {
+		var category = crawl.categories['guitars'].categories[0].name;
+		return new Promise(function (resolve, reject) {
+			crawl.crawl_data('guitars',category,1,false).then(function(res_first_page) {
+				crawl.crawl_data('guitars',category,2,false).then(function(res_second_page) {
+					assert.equal(Object.keys(res_second_page).length, 1);
+					assert.equal(Object.keys(res_second_page['guitars']).length, 1);
+					assert.equal(res_second_page['guitars'][category].length,
+						res_first_page['guitars'][category].length);
+					resolve()
+				}).catch(reject)
+			}).catch(reject)
+		}).then(function (value) {});
+
 	});
 });
