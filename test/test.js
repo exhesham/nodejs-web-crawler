@@ -2,7 +2,7 @@ var crawl = require('../crawl');
 var assert = require('assert');
 var http = require('http');
 
-var reqp = require('./request-promise');
+var reqp = require('../request-promise');
 
 describe('tests categories:', function() {
 	it('section correct', function() {
@@ -12,6 +12,7 @@ describe('tests categories:', function() {
 			'port': 80
 		}
 		return reqp.get(url).then(function(res) {
+			console.log(res.content)
 			assert.equal(200, res.statusCode);
 		})
 	});
@@ -35,45 +36,66 @@ describe('tests categories:', function() {
 	});
 });
 
-
+function arrayContainsArray (superset, subset) {
+	return subset.every(function (value) {
+		return (superset.indexOf(value) >= 0);
+	});
+}
 describe('tests returned category data format:', function() {
-	this.timeout(14000);
+	this.timeout(24000);
 	it('single section category', function() {
-		var category = crawl.categories['guitars'].categories[0].name;
-		return crawl.crawl_data('guitars',category,1,false).then(function(res) {
-			assert.equal(Object.keys(res).length, 1);
-			assert.equal(Object.keys(res['guitars']).length, 1);
-			assert.equal(res['guitars'][category].length > 1, true);
+		var category = 'classical-guitars';
+		return crawl.crawl_data('guitars','classical-guitars',1,false).then(function(res) {
+
+			console.log(res)
+			assert.equal(Array.isArray(res[category]), true);
+			assert.equal(res[category].length>1, true);
 		})
 	});
-	it('single category page test', function() {
-		var category = crawl.categories['guitars'].categories[0].name;
+	it('get one page and then all pages and compare test', function() {
+		var category = 'classical-guitars';
+		return new Promise(function (resolve, reject) {
+			crawl.crawl_data('guitars',category,1,false).then(function(res_second_page) {
+				crawl.crawl_data('guitars',category,1,true).then(function(all_category_pages) {
+
+
+					console.log('res_second_page', res_second_page[category].length)
+					console.log('all_category_pages', all_category_pages[category].length)
+					assert.equal(all_category_pages[category].length > res_second_page[category].length, true);
+					arrayContainsArray(all_category_pages[category], res_second_page[category])
+					resolve()
+				}).catch(reject)
+			}).catch(reject)
+		}).then(function (value) {});
+
+	});
+	it('get all pages and then one page and compare test', function() {
+		var category = 'classical-guitars';
+		return new Promise(function (resolve, reject) {
+			crawl.crawl_data('guitars',category,1,true).then(function(all_category_pages) {
+				crawl.crawl_data('guitars',category,1,false).then(function(res_second_page) {
+					console.log('res_second_page', res_second_page[category].length)
+					console.log('all_category_pages', all_category_pages[category].length)
+					assert.equal(all_category_pages[category].length > res_second_page[category].length, true);
+					arrayContainsArray(all_category_pages[category], res_second_page[category])
+					resolve()
+				}).catch(reject)
+			}).catch(reject)
+		}).then(function (value) {});
+	});
+
+	it('get first and second page test', function() {
+		var category = 'classical-guitars';
 		return new Promise(function (resolve, reject) {
 			crawl.crawl_data('guitars',category,1,false).then(function(res_first_page) {
 				crawl.crawl_data('guitars',category,2,false).then(function(res_second_page) {
-					assert.equal(Object.keys(res_second_page).length, 1);
-					assert.equal(Object.keys(res_second_page['guitars']).length, 1);
-					assert.equal(res_second_page['guitars'][category].length,
-						res_first_page['guitars'][category].length);
+					console.log(res_first_page)
+					assert.equal(Array.isArray(res_first_page[category]), true);
+					assert.equal(Array.isArray(res_second_page[category]), true);
+					assert.equal(res_second_page[category].length, res_first_page[category].length);
 					resolve()
 				}).catch(reject)
 			}).catch(reject)
 		}).then(function (value) {});
-
-	});
-	it('single category  1 page vs all test', function() {
-		var category = crawl.categories['guitars'].categories[0].name;
-		return new Promise(function (resolve, reject) {
-			crawl.crawl_data('guitars',category,1,false).then(function(res_first_page) {
-				crawl.crawl_data('guitars',category,1,true).then(function(res_second_page) {
-					console.log(res_second_page)
-					assert.equal(Object.keys(res_second_page).length, 1);
-					assert.equal(Object.keys(res_second_page['guitars']).length, 1);
-					assert.equal(res_first_page['guitars'][category].length < res_second_page['guitars'][category].length,true);
-					resolve()
-				}).catch(reject)
-			}).catch(reject)
-		}).then(function (value) {});
-
 	});
 });

@@ -5,30 +5,31 @@ var http = require('http');
 var htmlparser = require("htmlparser");
 var htmlparser2 = require("htmlparser2");
 var jsonfile = require('jsonfile');
-
+var reqp = require('./request-promise');
 
 var categories = {
 	'guitars': {
 		'path': '/?Section=2&displaystyle=2',
 		'pages': 1,
-		'categories': [
-			{'name': 'classical guitars', 'path': '/?Category=59&displaystyle=2'},
-			{'name': 'accoustic guitars', 'path': '/?Category=60&displaystyle=2'},
-			{'name': 'electric guitars', 'path': '/?Category=51&displaystyle=2'},
-			{'name': 'bass guitars', 'path': '/?Category=53&displaystyle=2'},
-			{'name': 'mandoline and banjos', 'path': '/?Category=168&displaystyle=2'},
-			{'name': 'ukulili', 'path': '/?Category=169&displaystyle=2'},
-			{'name': 'amplifiers', 'path': '/?Category=105&displaystyle=2'},
-			{'name': 'effects', 'path': '/?Category=63&displaystyle=2'},
-			{'name': 'strings', 'path': '/?Category=65&displaystyle=2'},
-			{'name': 'cases', 'path': '/?Category=170&displaystyle=2'},
-			{'name': 'others', 'path': '/?Category=64&displaystyle=2'},
-			{'name': 'pickups', 'path': '/?Category=66&displaystyle=2'},
-		]
+		'categories': {
+			'classical-guitars': {'name': 'classical guitars', 'path': '/?Category=59&displaystyle=2'},
+			'accoustic-guitars': {'name': 'accoustic guitars', 'path': '/?Category=60&displaystyle=2'},
+			'electric-guitars': {'name': 'electric guitars', 'path': '/?Category=51&displaystyle=2'},
+			'bass-guitars': {'name': 'bass guitars', 'path': '/?Category=53&displaystyle=2'},
+			'mandoline-guitars': {'name': 'mandoline and banjos', 'path': '/?Category=168&displaystyle=2'},
+			'ukulili': {'name': 'ukulili', 'path': '/?Category=169&displaystyle=2'},
+			'amplifiers': {'name': 'amplifiers', 'path': '/?Category=105&displaystyle=2'},
+			'effects': {'name': 'effects', 'path': '/?Category=63&displaystyle=2'},
+			'strings': {'name': 'strings', 'path': '/?Category=65&displaystyle=2'},
+			'cases': {'name': 'cases', 'path': '/?Category=170&displaystyle=2'},
+			'others': {'name': 'others', 'path': '/?Category=64&displaystyle=2'},
+			'pickups': {'name': 'pickups', 'path': '/?Category=66&displaystyle=2'},
+		}
+
 	},
 }
 
-var all_products = []   // this array will hold all the products mentioned in the categories
+var all_products = {}   // this dict will hold all the products mentioned in the categories
 var parent_url = 'kley-zemer.co.il';
 var desired_dom_attrs = {
 	/*These are the attrs that represent a single product */
@@ -46,7 +47,7 @@ function get_number(str) {
 	return found_number
 }
 
-function get_product_json(product_span, section, category) {
+function get_product_json(product_span, section, category_key) {
 	/* receives a span that include the product details and return a json
 	* */
 
@@ -68,7 +69,7 @@ function get_product_json(product_span, section, category) {
 	return {
 		'product-url': product_url,
 		'img-url': product_img_url,
-		'category': category.name,
+		'category-key': category_key,
 		'section': section,
 		'id': product_id,
 		'name': product_name,
@@ -93,7 +94,7 @@ function is_desired_dom(dom) {
 	return true;
 }
 
-function convert_relevant_product_doms_to_json(dom, section, category) {
+function convert_relevant_product_doms_to_json(dom, section, category_key) {
 	/*
 	* This function will receive the whole page dom and start scanning it for relevant doms.
 	* the relevant doms will be parsed and converted to json
@@ -106,61 +107,123 @@ function convert_relevant_product_doms_to_json(dom, section, category) {
 				if (!all_products[section]) {
 					all_products[section] = {};
 				}
-				if (!all_products[section][category.name]) {
-					all_products[section][category.name] = [];
+				if (!all_products[section][category_key]) {
+					all_products[section][category_key] = [];
 				}
-				all_products[section][category.name].push(get_product_json(children[i], section, category));
+				var result = get_product_json(children[i], section, category_key)
+				all_products[section][category_key].push(result);
 			}
 		} else {
-			convert_relevant_product_doms_to_json(children[i], section, category);
+			convert_relevant_product_doms_to_json(children[i], section, category_key);
 		}
 
 	}
 }
 
-function start_category_scan(section, category, page, callback) {
-	/*
-	* This function opens the category link and scan the page
-	* if the callback is not null, it calls the callback in order to get the maximum page number.
-	* the callback will call this method on the coming after pages.
-	* */
+function get_pages_number_from_first_page(data, section, category) {
+	var capture_num = false;
+	var pages_number = false;
+	return new Promise(function (resolve, reject) {
+		var parser = new htmlparser2.Parser({
+			onopentag: function (name, attribs, a) {
+				if (name === "span" && attribs.class.indexOf("paging OtherPage") >= 0) {
+					capture_num = true;
+				}
+			},
+			ontext: function (text) {
+				if (capture_num) {
+					text = parseInt(text)
+					var curr_pages = pages_number || 1
+					pages_number = text && text > curr_pages ? text : curr_pages;
+					capture_num = false
+				}
+
+			},
+			onclosetag: function (tagname) {
+				if (tagname === "body") {
+					//scan_category_pages(section, category, 2).then(resolve).catch(reject)
+					resolve(pages_number)
+				}
+			}
+		}, {decodeEntities: true});
+		parser.write(data);
+		parser.end();
+	});
+}
+
+function get_pages_number_of_category(section, category_key) {
 	return new Promise(function (resolve, reject) {
 		var options = {
 			host: parent_url,
 			port: 80,
 		}
-		options.path = category.path + '&Page=' + page;
+		options.path = categories[section].categories[category_key].path;
 
-		var request = http.request(options, function (res) {
-			var data = '';
+		reqp.get(options).then(function(res) {
+			var data = ''
 			res.on('data', function (chunk) {
 				data += chunk;
 			});
 			res.on('end', function () {
-				var rawHtml = data;
-				var handler = new htmlparser.DefaultHandler(function (error, dom) {
-					if (!error) {
-						for (var i in dom) {
-							convert_relevant_product_doms_to_json(dom[i], section, category);
-						}
-					}
-				});
-				var parser = new htmlparser.Parser(handler);
-				parser.parseComplete(rawHtml, category);
-				if (callback != null) {
-					callback(rawHtml, section, category).then(resolve).catch(reject)
-				} else {
-					resolve(all_products);
-				}
+				get_pages_number_from_first_page(data, section, category_key).then(resolve).catch(reject);
+
 			});
 		});
-		request.on('error', function (e) {
-			// TODO: retry on failure
-			reject(e);
-			//start_category_scan(section, category, page, callback)
-		});
-		request.end();
 	});
+}
+function start_category_scan(section, category_key, page, get_all_data) {
+	/*
+	* This function opens the category_key link and scan the page
+	* if the callback is not null, it calls the callback in order to get the maximum page number.
+	* */
+	return new Promise(function (resolve, reject) {
+		if (get_all_data) {
+			get_pages_number_of_category(section, category_key).then(function (total_pages) {
+				var all_promises = [];
+				for (var i = page; i < total_pages + 1; i++) {
+					all_promises.push(start_category_scan(section, category_key, i, false))
+				}
+				Promise.all(all_promises).then(function (res) {
+					resolve(all_products[section][category_key]);
+				}).catch(reject);
+			});
+		} else {
+			var options = {
+				host: parent_url,
+				port: 80,
+			}
+
+			options.path = categories[section].categories[category_key].path + '&Page=' + page;
+
+			var request = http.request(options, function (res) {
+				var data = '';
+				res.on('data', function (chunk) {
+					data += chunk;
+				});
+				res.on('end', function () {
+					var rawHtml = data;
+					var handler = new htmlparser.DefaultHandler(function (error, dom) {
+						if (!error) {
+							for (var i in dom) {
+								convert_relevant_product_doms_to_json(dom[i], section, category_key);
+							}
+						}
+					});
+					var parser = new htmlparser.Parser(handler);
+					parser.parseComplete(rawHtml, category_key);
+					resolve(all_products[section][category_key]);
+				});
+			});
+			request.on('error', function (e) {
+				// TODO: retry on failure
+				reject(e);
+				//start_category_scan(section, category_key, page, callback)
+			});
+			request.end();
+		}
+
+	});
+
 }
 
 /**
@@ -176,78 +239,44 @@ function scan_category_pages(section, category, start_page_number) {
 	}
 	var async_promises = []
 	for (var i = start_page_number; i < category.pages + 1; i++) {
-		async_promises.push(start_category_scan(section, category, i, null));
+		async_promises.push(start_category_scan(section, category, i));
 	}
 	return Promise.all(async_promises)
 }
 
-function get_pages_number_from_first_page(data, section, category) {
-	var capture_num = false;
-	return new Promise(function (resolve, reject) {
-		var parser = new htmlparser2.Parser({
-			onopentag: function (name, attribs, a) {
-				if (name === "span" && attribs.class.indexOf("paging OtherPage") >= 0) {
-					capture_num = true;
-				}
-			},
-			ontext: function (text) {
-				if (capture_num) {
-					text = parseInt(text)
-					var curr_pages = category.pages || 1
-					category.pages = text && text > curr_pages ? text : curr_pages;
-					capture_num = false
-				}
 
-			},
-			onclosetag: function (tagname) {
-				if (tagname === "body") {
-					scan_category_pages(section, category, 2).then(resolve).catch(reject)
-				}
-			}
-		}, {decodeEntities: true});
-		parser.write(data);
-		parser.end();
-	});
-}
 
 /**
  * Crawl data for specific category. if category is null, then will scan all the categories
  * @param section_name the section name that referenece the category
- * @param category_name the category name to scan. if the category name is null then will scan all the categories under the section name
+ * @param category_key the category key to scan. if the category name is null then will scan all the categories under the section name
  * @param page the page number to scan. if the page number is undefined, then will start scanning from page = 1
  * @param get_all_data boolean parameter. if true, then will scan all the pages after page too. otherwise, will scan only the referenced page.
  * @returns {promise}
  */
-function crawl_data(section_name, category_name, page, get_all_data) {
+function crawl_data(section_name, category_key, page, get_all_data) {
 	if (!section_name || !section_name in categories) {
-		return null;
+		throw 'input is not correct';
 	}
-	if (!page) {
-		page = 1;
-	}
-
-	var async_promises = [];
-	if (!category_name) {
-		// in this case we will scan all the categories of the section and return the represented data.
-		for (var i in categories[section_name].categories) {
-			var category =  categories[section_name].categories[i];
-			async_promises.push(start_category_scan(section_name, category, page, get_all_data ? get_pages_number_from_first_page : null));
+	return new Promise(function (resolve, reject) {
+		if (!page) {
+			page = 1;
 		}
-		return Promise.all(async_promises);
-	} else {
-		var found_category = null;
-		for (var i in categories[section_name].categories) {
-			if(categories[section_name].categories[i].name == category_name){
-				found_category = categories[section_name].categories[i];
-				break;
+		var async_promises = [];
+		var keys_to_scan = category_key ? [category_key] : Object.keys(categories[section_name].categories);
+		for (var i in keys_to_scan) {
+			async_promises.push(start_category_scan(section_name, keys_to_scan[i], page, get_all_data));
+		}
+		Promise.all(async_promises).then(function (value) {
+			if(!category_key){
+				resolve(all_products[section_name]);
+			}else{
+				var res = {};
+				res[category_key] = all_products[section_name][category_key]
+				resolve(res);
 			}
-		}
-		if(!found_category){
-			throw 'no such a category name: ' + category_name;
-		}else{
-			return start_category_scan(section_name, found_category, page, get_all_data ? get_pages_number_from_first_page : null)
-		}
-	}
+		}).catch(reject);
+	});
 }
 
 /***
@@ -258,7 +287,7 @@ function scan_and_save() {
 	for (var section_name in categories) {
 		for (var i in categories[section_name].categories) {
 			var category = categories[section_name].categories[i];
-			async_promises.push(start_category_scan(section_name, category, 1, get_pages_number_from_first_page));
+			async_promises.push(start_category_scan(section_name, category, 1));
 		}
 	}
 	Promise.all(async_promises).then(function () {
@@ -286,3 +315,4 @@ exports.categories = categories;        // tested
 exports.scan_and_save = scan_and_save;
 exports.crawl_data = crawl_data;        // partially tested - testing for single category
 exports.desired_dom_attrs = desired_dom_attrs;        // tested - covered by crawl_data
+exports.get_pages_number_of_category = get_pages_number_of_category;
