@@ -8,125 +8,742 @@ var jsonfile = require('jsonfile');
 var reqp = require('./request-promise');
 
 var categories = {
-	'guitars': {
-		'title':'Guitars',
-		'path': '/?Section=2&displaystyle=2',
-		'pages': 1,
-		'categories': {
-			'classical-guitars': {'name': 'classical guitars', 'path': '/?Category=59&displaystyle=2'},
-			'accoustic-guitars': {'name': 'accoustic guitars', 'path': '/?Category=60&displaystyle=2'},
-			'electric-guitars': {'name': 'electric guitars', 'path': '/?Category=51&displaystyle=2'},
-			'bass-guitars': {'name': 'bass guitars', 'path': '/?Category=53&displaystyle=2'},
-			'mandoline-guitars': {'name': 'mandoline and banjos', 'path': '/?Category=168&displaystyle=2'},
-			'ukulili': {'name': 'ukulili', 'path': '/?Category=169&displaystyle=2'},
-			'amplifiers': {'name': 'amplifiers', 'path': '/?Category=105&displaystyle=2'},
-			'effects': {'name': 'effects', 'path': '/?Category=63&displaystyle=2'},
-			'strings': {'name': 'strings', 'path': '/?Category=65&displaystyle=2'},
-			'cases': {'name': 'cases', 'path': '/?Category=170&displaystyle=2'},
-			'others': {'name': 'others', 'path': '/?Category=64&displaystyle=2'},
-			'pickups': {'name': 'pickups', 'path': '/?Category=66&displaystyle=2'},
-		}
-
-	},
-	'sound':{'title':'DJ Equipment',
-		'path':'/?Section=5&displaystyle=2',
-		'pages':1,
-		'categories':{
-			'speakers': {'name': 'Speakers', 'path': '/?Category=147&displaystyle=2'},
-			'monitors': {'name': 'Monitors', 'path': '/?Category=140&displaystyle=2'},
-			'mobile-amp-systems': {'name': 'Mobile Amps', 'path': '/?Category=146&displaystyle=2'},
-			'install-systems': {'name': 'Fixed Install', 'path': '/?Category=173&displaystyle=2'},
-			'dj-accessories': {'name': 'DJ Accessories', 'path': '/?Category=118&displaystyle=2'},
-			'amplifiers': {'name': 'Amplifiers', 'path': '/?Category=145&displaystyle=2'},
-			'mixers': {'name': 'Mixers', 'path': '/?Category=144&displaystyle=2'},
-			'performance-processors': {'name': 'Performance Processor', 'path': '/?Category=143&displaystyle=2'},
-			'tube-preamp': {'name': 'Tube Preamplifier', 'path': '/?Category=142&displaystyle=2'},
-			'audio': {'name': ' כרטיסי קול וממשקי אודיו', 'path': '/?Category=139&displaystyle=2'},
-			'headphones': {'name': 'אוזניות', 'path': '/?Category=149&displaystyle=2'},
-			'mobile-sp': {'name': 'מקולים ניידים', 'path': '/?Category=176&displaystyle=2'},
-			'mics': {'name': '  מיקרופונים', 'path': '/?Category=121&displaystyle=2'},
-			'mobile-rec': {'name': ' מכשירי הקלטה ניידים', 'path': '/?Category=141&displaystyle=2'},
-			'cat172': {'name': '  נגני מדיה לבמה ולאולפן', 'path': '/?Category=172&displaystyle=2'},
-			'accessories': {'name': ' אביזרים וציוד סאונד היקפי', 'path': '/?Category=148&displaystyle=2'},
-			'stands': {'name': ' סטנדים וארונות מסד לציוד אודיו', 'path': '/?Category=123&displaystyle=2'},
-			'books': {'name': '  ספרי הדרכה ותוכנות לי', 'path': '/?Category=158&displaystyle=2'},
-			'accoustics': {'name': '  אקוסטיקה', 'path': '/?Category=152&displaystyle=2'},
-		}
-	},
-	 'lightings':{'title':'Lightings',
-	 	'path':'/?Section=&displaystyle=2',
-	 	'pages':1,
-	 	'categories':{'stage-dj': {'name': 'Stage & DJ', 'path': '/?Category=162&displaystyle=2'},
-	 		'smoke-haze': {'name': 'Haze & Smoke machines', 'path': '/?Category=164&displaystyle=2'},
-	 		'dmx': {'name': 'DMX controller', 'path': '/?Category=165&displaystyle=2'},
-	 		},},
-	// 'pianos':{'title':'Keyboards',
-	// 	'path':'/?Section=&displaystyle=2',
-	// 	'pages':1,
-	// 	'categories':{
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 	},},
-	// 'drums':{'title':'Drums',
-	// 	'path':'/?Section=&displaystyle=2',
-	// 	'pages':1,
-	// 	'categories':{
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 	}
-	// 	,},
-	// 'accordions-violens':{'title':'Bands & Orchestras',
-	// 	'path':'/?Section=&displaystyle=2',
-	// 	'pages':1,
-	// 	'categories':{
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 	}},
-	// 'accessories':{'title':'Accessories',
-	// 	'path':'/?Section=&displaystyle=2',
-	// 	'pages':1,
-	// 	'categories':{'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
-	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},}},
+    "guitars": {
+        "title": "Guitars",
+        "path": "/?Section=2&displaystyle=2",
+        "pages": 1,
+        "categories": {
+            "classical-guitars": {
+                "name": "classical guitars",
+                "path": "/?Category=59&displaystyle=2"
+            },
+            "accoustic-guitars": {
+                "name": "accoustic guitars",
+                "path": "/?Category=60&displaystyle=2"
+            },
+            "electric-guitars": {
+                "name": "electric guitars",
+                "path": "/?Category=51&displaystyle=2"
+            },
+            "bass-guitars": {
+                "name": "bass guitars",
+                "path": "/?Category=53&displaystyle=2"
+            },
+            "mandoline-guitars": {
+                "name": "mandoline and banjos",
+                "path": "/?Category=168&displaystyle=2"
+            },
+            "ukulili": {
+                "name": "ukulili",
+                "path": "/?Category=169&displaystyle=2"
+            },
+            "amplifiers": {
+                "name": "amplifiers",
+                "path": "/?Category=105&displaystyle=2"
+            },
+            "effects": {
+                "name": "effects",
+                "path": "/?Category=63&displaystyle=2"
+            },
+            "strings": {
+                "name": "strings",
+                "path": "/?Category=65&displaystyle=2"
+            },
+            "cases": {
+                "name": "cases",
+                "path": "/?Category=170&displaystyle=2"
+            },
+            "others": {
+                "name": "others",
+                "path": "/?Category=64&displaystyle=2"
+            },
+            "pickups": {
+                "name": "pickups",
+                "path": "/?Category=66&displaystyle=2"
+            }
+        },
+        "manufactures": {
+            "Yamaha": {
+                "name": "Yamaha",
+                "link": ".?manufacturer=92&Section=2&displaystyle=2"
+            },
+            "Fender": {
+                "name": "Fender",
+                "link": ".?manufacturer=94&Section=2&displaystyle=2"
+            },
+            "Gibson": {
+                "name": "Gibson",
+                "link": ".?manufacturer=95&Section=2&displaystyle=2"
+            },
+            "Ibanez": {
+                "name": "Ibanez",
+                "link": ".?manufacturer=96&Section=2&displaystyle=2"
+            },
+            "Admira": {
+                "name": "Admira",
+                "link": ".?manufacturer=124&Section=2&displaystyle=2"
+            },
+            "Breedlove": {
+                "name": "Breedlove",
+                "link": ".?manufacturer=129&Section=2&displaystyle=2"
+            },
+            "Epiphone": {
+                "name": "Epiphone",
+                "link": ".?manufacturer=99&Section=2&displaystyle=2"
+            },
+            "Blackstar": {
+                "name": "Blackstar",
+                "link": ".?manufacturer=221&Section=2&displaystyle=2"
+            },
+            "CNB": {
+                "name": "CNB",
+                "link": ".?manufacturer=200&Section=2&displaystyle=2"
+            },
+            "D'Addario": {
+                "name": "D'Addario",
+                "link": ".?manufacturer=177&Section=2&displaystyle=2"
+            },
+            "DigiTech": {
+                "name": "DigiTech",
+                "link": ".?manufacturer=137&Section=2&displaystyle=2"
+            },
+            "DV Mark": {
+                "name": "DV Mark",
+                "link": ".?manufacturer=236&Section=2&displaystyle=2"
+            },
+            "DOD": {
+                "name": "DOD",
+                "link": ".?manufacturer=138&Section=2&displaystyle=2"
+            },
+            "Dunlop": {
+                "name": "Dunlop",
+                "link": ".?manufacturer=119&Section=2&displaystyle=2"
+            },
+            "Elixir": {
+                "name": "Elixir",
+                "link": ".?manufacturer=179&Section=2&displaystyle=2"
+            },
+            "Alhambra": {
+                "name": "Alhambra",
+                "link": ".?manufacturer=126&Section=2&displaystyle=2"
+            },
+            "GHS Strings": {
+                "name": "GHS Strings",
+                "link": ".?manufacturer=180&Section=2&displaystyle=2"
+            },
+            "Gretsch": {
+                "name": "Gretsch",
+                "link": ".?manufacturer=98&Section=2&displaystyle=2"
+            },
+            "Hartke": {
+                "name": "Hartke",
+                "link": ".?manufacturer=132&Section=2&displaystyle=2"
+            },
+            "Hercules Stands": {
+                "name": "Hercules Stands",
+                "link": ".?manufacturer=115&Section=2&displaystyle=2"
+            },
+            "Hannabach": {
+                "name": "Hannabach",
+                "link": ".?manufacturer=199&Section=2&displaystyle=2"
+            },
+            "Hohner": {
+                "name": "Hohner",
+                "link": ".?manufacturer=120&Section=2&displaystyle=2"
+            },
+            "Jackson": {
+                "name": "Jackson",
+                "link": ".?manufacturer=97&Section=2&displaystyle=2"
+            },
+            "Kapok": {
+                "name": "Kapok",
+                "link": ".?manufacturer=228&Section=2&displaystyle=2"
+            },
+            "Labella": {
+                "name": "Labella",
+                "link": ".?manufacturer=214&Section=2&displaystyle=2"
+            },
+            "LR Baggs": {
+                "name": "LR Baggs",
+                "link": ".?manufacturer=203&Section=2&displaystyle=2"
+            },
+            "Markbass": {
+                "name": "Markbass",
+                "link": ".?manufacturer=209&Section=2&displaystyle=2"
+            },
+            "ModTone": {
+                "name": "ModTone",
+                "link": ".?manufacturer=136&Section=2&displaystyle=2"
+            },
+            "Platinum": {
+                "name": "Platinum",
+                "link": ".?manufacturer=114&Section=2&displaystyle=2"
+            },
+            "Kyser": {
+                "name": "Kyser",
+                "link": ".?manufacturer=205&Section=2&displaystyle=2"
+            },
+            "QuikLok": {
+                "name": "QuikLok",
+                "link": ".?manufacturer=116&Section=2&displaystyle=2"
+            },
+            "Rockson": {
+                "name": "Rockson",
+                "link": ".?manufacturer=246&Section=2&displaystyle=2"
+            },
+            "Samson": {
+                "name": "Samson",
+                "link": ".?manufacturer=150&Section=2&displaystyle=2"
+            },
+            "Squier by Fender": {
+                "name": "Squier by Fender",
+                "link": ".?manufacturer=100&Section=2&displaystyle=2"
+            },
+            "Steinbach": {
+                "name": "Steinbach",
+                "link": ".?manufacturer=101&Section=2&displaystyle=2"
+            },
+            "Takamine": {
+                "name": "Takamine",
+                "link": ".?manufacturer=125&Section=2&displaystyle=2"
+            },
+            "Taylor": {
+                "name": "Taylor",
+                "link": ".?manufacturer=130&Section=2&displaystyle=2"
+            },
+            "Wittner": {
+                "name": "Wittner",
+                "link": ".?manufacturer=113&Section=2&displaystyle=2"
+            },
+            "Zoom": {
+                "name": "Zoom",
+                "link": ".?manufacturer=135&Section=2&displaystyle=2"
+            },
+            "Gator": {
+                "name": "Gator",
+                "link": ".?manufacturer=144&Section=2&displaystyle=2"
+            },
+            "Gibraltar": {
+                "name": "Gibraltar",
+                "link": ".?manufacturer=193&Section=2&displaystyle=2"
+            },
+            "Kirlin Cable": {
+                "name": "Kirlin Cable",
+                "link": ".?manufacturer=223&Section=2&displaystyle=2"
+            },
+            "��� ����� ��� ���": {
+                "name": "��� ����� ��� ���",
+                "link": ".?manufacturer=192&Section=2&displaystyle=2"
+            },
+            "Augustine": {
+                "name": "Augustine",
+                "link": ".?manufacturer=207&Section=2&displaystyle=2"
+            },
+            "EVH": {
+                "name": "EVH",
+                "link": ".?manufacturer=232&Section=2&displaystyle=2"
+            }
+        }
+    },
+    "sound": {
+        "title": "DJ Equipment",
+        "path": "/?Section=5&displaystyle=2",
+        "pages": 1,
+        "categories": {
+            "speakers": {
+                "name": "Speakers",
+                "path": "/?Category=147&displaystyle=2"
+            },
+            "monitors": {
+                "name": "Monitors",
+                "path": "/?Category=140&displaystyle=2"
+            },
+            "mobile-amp-systems": {
+                "name": "Mobile Amps",
+                "path": "/?Category=146&displaystyle=2"
+            },
+            "install-systems": {
+                "name": "Fixed Install",
+                "path": "/?Category=173&displaystyle=2"
+            },
+            "dj-accessories": {
+                "name": "DJ Accessories",
+                "path": "/?Category=118&displaystyle=2"
+            },
+            "amplifiers": {
+                "name": "Amplifiers",
+                "path": "/?Category=145&displaystyle=2"
+            },
+            "mixers": {
+                "name": "Mixers",
+                "path": "/?Category=144&displaystyle=2"
+            },
+            "performance-processors": {
+                "name": "Performance Processor",
+                "path": "/?Category=143&displaystyle=2"
+            },
+            "tube-preamp": {
+                "name": "Tube Preamplifier",
+                "path": "/?Category=142&displaystyle=2"
+            },
+            "audio": {
+                "name": " ������ ��� ������ �����",
+                "path": "/?Category=139&displaystyle=2"
+            },
+            "headphones": {
+                "name": "�������",
+                "path": "/?Category=149&displaystyle=2"
+            },
+            "mobile-sp": {
+                "name": "������ ������",
+                "path": "/?Category=176&displaystyle=2"
+            },
+            "mics": {
+                "name": "  ����������",
+                "path": "/?Category=121&displaystyle=2"
+            },
+            "mobile-rec": {
+                "name": " ������ ����� ������",
+                "path": "/?Category=141&displaystyle=2"
+            },
+            "cat172": {
+                "name": "  ���� ���� ���� �������",
+                "path": "/?Category=172&displaystyle=2"
+            },
+            "accessories": {
+                "name": " ������� ����� ����� �����",
+                "path": "/?Category=148&displaystyle=2"
+            },
+            "stands": {
+                "name": " ������ ������� ��� ����� �����",
+                "path": "/?Category=123&displaystyle=2"
+            },
+            "books": {
+                "name": "  ���� ����� ������� ��",
+                "path": "/?Category=158&displaystyle=2"
+            },
+            "accoustics": {
+                "name": "  ��������",
+                "path": "/?Category=152&displaystyle=2"
+            }
+        },
+        "manufactures": {
+            "Yamaha": {
+                "name": "Yamaha",
+                "link": ".?manufacturer=92&Section=5&displaystyle=2"
+            },
+            "Apogee": {
+                "name": "Apogee",
+                "link": ".?manufacturer=234&Section=5&displaystyle=2"
+            },
+            "Fender": {
+                "name": "Fender",
+                "link": ".?manufacturer=94&Section=5&displaystyle=2"
+            },
+            "JBL Professional": {
+                "name": "JBL Professional",
+                "link": ".?manufacturer=102&Section=5&displaystyle=2"
+            },
+            "dbx": {
+                "name": "dbx",
+                "link": ".?manufacturer=157&Section=5&displaystyle=2"
+            },
+            "BSS": {
+                "name": "BSS",
+                "link": ".?manufacturer=158&Section=5&displaystyle=2"
+            },
+            "Alesis": {
+                "name": "Alesis",
+                "link": ".?manufacturer=152&Section=5&displaystyle=2"
+            },
+            "AKG": {
+                "name": "AKG",
+                "link": ".?manufacturer=153&Section=5&displaystyle=2"
+            },
+            "Soundcraft": {
+                "name": "Soundcraft",
+                "link": ".?manufacturer=149&Section=5&displaystyle=2"
+            },
+            "Numark": {
+                "name": "Numark",
+                "link": ".?manufacturer=148&Section=5&displaystyle=2"
+            },
+            "JBL": {
+                "name": "JBL",
+                "link": ".?manufacturer=231&Section=5&displaystyle=2"
+            },
+            "Gemini": {
+                "name": "Gemini",
+                "link": ".?manufacturer=147&Section=5&displaystyle=2"
+            },
+            "Hercules Stands": {
+                "name": "Hercules Stands",
+                "link": ".?manufacturer=115&Section=5&displaystyle=2"
+            },
+            "Lexicon Pro": {
+                "name": "Lexicon Pro",
+                "link": ".?manufacturer=154&Section=5&displaystyle=2"
+            },
+            "Maxtone": {
+                "name": "Maxtone",
+                "link": ".?manufacturer=104&Section=5&displaystyle=2"
+            },
+            "Platinum": {
+                "name": "Platinum",
+                "link": ".?manufacturer=114&Section=5&displaystyle=2"
+            },
+            "Presonus": {
+                "name": "Presonus",
+                "link": ".?manufacturer=155&Section=5&displaystyle=2"
+            },
+            "KZPRO": {
+                "name": "KZPRO",
+                "link": ".?manufacturer=249&Section=5&displaystyle=2"
+            },
+            "QuikLok": {
+                "name": "QuikLok",
+                "link": ".?manufacturer=116&Section=5&displaystyle=2"
+            },
+            "Samson": {
+                "name": "Samson",
+                "link": ".?manufacturer=150&Section=5&displaystyle=2"
+            },
+            "Zoom": {
+                "name": "Zoom",
+                "link": ".?manufacturer=135&Section=5&displaystyle=2"
+            },
+            "Gator": {
+                "name": "Gator",
+                "link": ".?manufacturer=144&Section=5&displaystyle=2"
+            },
+            "��� ����� ��� ���": {
+                "name": "��� ����� ��� ���",
+                "link": ".?manufacturer=192&Section=5&displaystyle=2"
+            },
+            "��� �����": {
+                "name": "��� �����",
+                "link": ".?manufacturer=191&Section=5&displaystyle=2"
+            },
+            "Soundking": {
+                "name": "Soundking",
+                "link": ".?manufacturer=233&Section=5&displaystyle=2"
+            },
+            "Tascam": {
+                "name": "Tascam",
+                "link": ".?manufacturer=235&Section=5&displaystyle=2"
+            }
+        }
+    },
+    "lightings": {
+        "title": "Lightings",
+        "path": "/?Section=30&displaystyle=2",
+        "pages": 1,
+        "categories": {
+            "stage-dj": {
+                "name": "Stage & DJ",
+                "path": "/?Category=162&displaystyle=2"
+            },
+            "smoke-haze": {
+                "name": "Haze & Smoke machines",
+                "path": "/?Category=164&displaystyle=2"
+            },
+            "dmx": {
+                "name": "DMX controller",
+                "path": "/?Category=165&displaystyle=2"
+            }
+        },
+        "manufactures": {
+            "Chauvet": {
+                "name": "Chauvet",
+                "link": ".?manufacturer=230&Section=30&displaystyle=2"
+            }
+        }
+    },
+    "pianos": {
+        "title": "Keyboards",
+        "path": "/?Section=16&displaystyle=2",
+        "pages": 1,
+        "categories": {
+            "stand pianos": {
+                "name": "Stand Pianos",
+                "path": "/?Category=70&displaystyle=2"
+            },
+            "synth": {
+                "name": "Synthesizers",
+                "path": "/?Category=124&displaystyle=2"
+            },
+            "elec-piano": {
+                "name": "Electric Pianos",
+                "path": "/?Category=74&displaystyle=2"
+            },
+            "master-keyboard": {
+                "name": "Master Keyboard",
+                "path": "/?Category=73&displaystyle=2"
+            },
+            "drum-machine": {
+                "name": "Drum Machine",
+                "path": "/?Category=125&displaystyle=2"
+            },
+            "accessories": {
+                "name": "Accessories",
+                "path": "/?Category=76&displaystyle=2"
+            }
+        },
+        "manufactures": {
+            "Yamaha": {
+                "name": "Yamaha",
+                "link": ".?manufacturer=92&Section=16&displaystyle=2"
+            },
+            "Alesis": {
+                "name": "Alesis",
+                "link": ".?manufacturer=152&Section=16&displaystyle=2"
+            },
+            "Casio": {
+                "name": "Casio",
+                "link": ".?manufacturer=227&Section=16&displaystyle=2"
+            },
+            "Discacciati": {
+                "name": "Discacciati",
+                "link": ".?manufacturer=178&Section=16&displaystyle=2"
+            },
+            "Hercules Stands": {
+                "name": "Hercules Stands",
+                "link": ".?manufacturer=115&Section=16&displaystyle=2"
+            },
+            "Miditech": {
+                "name": "Miditech",
+                "link": ".?manufacturer=212&Section=16&displaystyle=2"
+            },
+            "QuikLok": {
+                "name": "QuikLok",
+                "link": ".?manufacturer=116&Section=16&displaystyle=2"
+            },
+            "Samson": {
+                "name": "Samson",
+                "link": ".?manufacturer=150&Section=16&displaystyle=2"
+            },
+            "Gator": {
+                "name": "Gator",
+                "link": ".?manufacturer=144&Section=16&displaystyle=2"
+            },
+            "Kirlin Cable": {
+                "name": "Kirlin Cable",
+                "link": ".?manufacturer=223&Section=16&displaystyle=2"
+            }
+        }
+    },
+    "drums": {
+        "title": "Drums",
+        "path": "/?Section=17&displaystyle=2",
+        "pages": 1,
+        "categories": {},
+        "manufactures": {
+            "Yamaha": {
+                "name": "Yamaha",
+                "link": ".?manufacturer=92&Section=17&displaystyle=2"
+            },
+            "Tama": {
+                "name": "Tama",
+                "link": ".?manufacturer=169&Section=17&displaystyle=2"
+            },
+            "LP - Latin Percussion": {
+                "name": "LP - Latin Percussion",
+                "link": ".?manufacturer=106&Section=17&displaystyle=2"
+            },
+            "Alesis": {
+                "name": "Alesis",
+                "link": ".?manufacturer=152&Section=17&displaystyle=2"
+            },
+            "Mapex": {
+                "name": "Mapex",
+                "link": ".?manufacturer=170&Section=17&displaystyle=2"
+            },
+            "CNB": {
+                "name": "CNB",
+                "link": ".?manufacturer=200&Section=17&displaystyle=2"
+            },
+            "Gitre": {
+                "name": "Gitre",
+                "link": ".?manufacturer=167&Section=17&displaystyle=2"
+            },
+            "HQ percussion": {
+                "name": "HQ percussion",
+                "link": ".?manufacturer=213&Section=17&displaystyle=2"
+            },
+            "Linko": {
+                "name": "Linko",
+                "link": ".?manufacturer=105&Section=17&displaystyle=2"
+            },
+            "Masterwork": {
+                "name": "Masterwork",
+                "link": ".?manufacturer=168&Section=17&displaystyle=2"
+            },
+            "Maxtone": {
+                "name": "Maxtone",
+                "link": ".?manufacturer=104&Section=17&displaystyle=2"
+            },
+            "Parrot": {
+                "name": "Parrot",
+                "link": ".?manufacturer=103&Section=17&displaystyle=2"
+            },
+            "Samson": {
+                "name": "Samson",
+                "link": ".?manufacturer=150&Section=17&displaystyle=2"
+            },
+            "Toca Percussion": {
+                "name": "Toca Percussion",
+                "link": ".?manufacturer=222&Section=17&displaystyle=2"
+            },
+            "Vic Firth": {
+                "name": "Vic Firth",
+                "link": ".?manufacturer=189&Section=17&displaystyle=2"
+            },
+            "Zildjian": {
+                "name": "Zildjian",
+                "link": ".?manufacturer=171&Section=17&displaystyle=2"
+            },
+            "Gibraltar": {
+                "name": "Gibraltar",
+                "link": ".?manufacturer=193&Section=17&displaystyle=2"
+            },
+            "Remo": {
+                "name": "Remo",
+                "link": ".?manufacturer=208&Section=17&displaystyle=2"
+            }
+        }
+    },
+    "accordions-violens": {
+        "title": "Bands & Orchestras",
+        "path": "/?Section=18&displaystyle=2",
+        "pages": 1,
+        "categories": {},
+        "manufactures": {
+            "Cremona": {
+                "name": "Cremona",
+                "link": ".?manufacturer=146&Section=18&displaystyle=2"
+            },
+            "D'Addario": {
+                "name": "D'Addario",
+                "link": ".?manufacturer=177&Section=18&displaystyle=2"
+            },
+            "Hercules Stands": {
+                "name": "Hercules Stands",
+                "link": ".?manufacturer=115&Section=18&displaystyle=2"
+            },
+            "Hofner": {
+                "name": "Hofner",
+                "link": ".?manufacturer=131&Section=18&displaystyle=2"
+            },
+            "Hohner": {
+                "name": "Hohner",
+                "link": ".?manufacturer=120&Section=18&displaystyle=2"
+            },
+            "Steinbach": {
+                "name": "Steinbach",
+                "link": ".?manufacturer=101&Section=18&displaystyle=2"
+            },
+            "Valencia": {
+                "name": "Valencia",
+                "link": ".?manufacturer=122&Section=18&displaystyle=2"
+            },
+            "Franco Marcelli": {
+                "name": "Franco Marcelli",
+                "link": ".?manufacturer=216&Section=18&displaystyle=2"
+            }
+        }
+    },
+    "wind-inst": {
+        "title": "Wind Instruments",
+        "path": "/?Section=7&displaystyle=2",
+        "pages": 1,
+        "categories": {},
+        "manufactures": {
+            "Yamaha": {
+                "name": "Yamaha",
+                "link": ".?manufacturer=92&Section=7&displaystyle=2"
+            },
+            "Hercules Stands": {
+                "name": "Hercules Stands",
+                "link": ".?manufacturer=115&Section=7&displaystyle=2"
+            },
+            "Hohner": {
+                "name": "Hohner",
+                "link": ".?manufacturer=120&Section=7&displaystyle=2"
+            },
+            "Jupiter": {
+                "name": "Jupiter",
+                "link": ".?manufacturer=140&Section=7&displaystyle=2"
+            },
+            "BG France": {
+                "name": "BG France",
+                "link": ".?manufacturer=175&Section=7&displaystyle=2"
+            },
+            "Rico": {
+                "name": "Rico",
+                "link": ".?manufacturer=183&Section=7&displaystyle=2"
+            },
+            "Swan": {
+                "name": "Swan",
+                "link": ".?manufacturer=107&Section=7&displaystyle=2"
+            },
+            "��� ����� ��� ���": {
+                "name": "��� ����� ��� ���",
+                "link": ".?manufacturer=192&Section=7&displaystyle=2"
+            },
+            "Aulos": {
+                "name": "Aulos",
+                "link": ".?manufacturer=143&Section=7&displaystyle=2"
+            },
+            "Al Cass": {
+                "name": "Al Cass",
+                "link": ".?manufacturer=219&Section=7&displaystyle=2"
+            }
+        }
+    },
+    "accessories": {
+        "title": "Accessories",
+        "path": "/?Section=22&displaystyle=2",
+        "pages": 1,
+        "categories": {},
+        "manufactures": {
+            "Fender": {
+                "name": "Fender",
+                "link": ".?manufacturer=94&Section=22&displaystyle=2"
+            },
+            "Ibanez": {
+                "name": "Ibanez",
+                "link": ".?manufacturer=96&Section=22&displaystyle=2"
+            },
+            "Dunlop": {
+                "name": "Dunlop",
+                "link": ".?manufacturer=119&Section=22&displaystyle=2"
+            },
+            "Hercules Stands": {
+                "name": "Hercules Stands",
+                "link": ".?manufacturer=115&Section=22&displaystyle=2"
+            },
+            "Platinum": {
+                "name": "Platinum",
+                "link": ".?manufacturer=114&Section=22&displaystyle=2"
+            },
+            "QuikLok": {
+                "name": "QuikLok",
+                "link": ".?manufacturer=116&Section=22&displaystyle=2"
+            },
+            "Samson": {
+                "name": "Samson",
+                "link": ".?manufacturer=150&Section=22&displaystyle=2"
+            },
+            "Wittner": {
+                "name": "Wittner",
+                "link": ".?manufacturer=113&Section=22&displaystyle=2"
+            },
+            "Mahalo": {
+                "name": "Mahalo",
+                "link": ".?manufacturer=206&Section=22&displaystyle=2"
+            }
+        }
+    }
 }
 
 var all_products = {}   // this dict will hold all the products mentioned in the categories
@@ -409,7 +1026,67 @@ function scan_and_save() {
 		console.log('error ', e)
 	});
 }
-scan_and_save()
+
+function generate_categories_for_sections(){
+    function get_section_manufacturers(section_name){
+        return new Promise(function (resolve, reject) {
+            var options = {
+                host: parent_url,
+                port: 80,
+            }
+            var section_categories= {};
+            options.path = categories[section_name].path;
+
+            reqp.get(options).then(function(res) {
+                var data = ''
+                var capture_num = false;
+                var href = '';
+                res.on('data', function (chunk) {
+                    data += chunk;
+                });
+                res.on('end', function () {
+                    var parser = new htmlparser2.Parser({
+                        onopentag: function (name, attribs, a) {
+                            if (name === "a" && attribs.xclass && attribs.xclass.indexOf("sidebarItem") >= 0) {
+                                href = attribs.href + '&displaystyle=2'
+                                capture_num = true;
+                            }
+                        },
+                        ontext: function (text) {
+                            if (capture_num) {
+                                section_categories[text] = {'name':text,'link':href}
+                                capture_num = false
+                            }
+
+                        },
+                        onclosetag: function (tagname) {
+                            if (tagname === "body") {
+                                categories[section_name].manufactures = section_categories;
+                                resolve(section_categories);
+                                // store category
+
+
+                            }
+                        }
+                    }, {decodeEntities: true});
+                    parser.write(data);
+                    parser.end();
+
+                });
+            });
+        });
+    }
+    var async_promises = []
+    for (var section_name in categories) {
+            async_promises.push(get_section_manufacturers(section_name));
+
+    }
+    return Promise.all(async_promises);
+}
+// scan_and_save()
+generate_categories_for_sections().then(function () {
+	console.dir(categories)
+})
 exports.parent_url = parent_url;        // tested
 exports.categories = categories;        // tested
 exports.scan_and_save = scan_and_save;
