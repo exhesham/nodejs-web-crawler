@@ -11,6 +11,7 @@
     "htmlparser": "^1.7.7",
     "htmlparser2": "^3.9.2",
     "http": "0.0.0",
-    "jsdom": "^11.5.1"
+    "jsdom": "^11.5.1",
+    "jsonfile": "^4.0.0"
   }
 }
