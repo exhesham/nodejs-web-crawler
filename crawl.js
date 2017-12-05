@@ -9,6 +9,7 @@ var reqp = require('./request-promise');
 
 var categories = {
 	'guitars': {
+		'title':'Guitars',
 		'path': '/?Section=2&displaystyle=2',
 		'pages': 1,
 		'categories': {
@@ -27,6 +28,113 @@ var categories = {
 		}
 
 	},
+	'sound':{'title':'DJ Equipment',
+		'path':'/?Section=5&displaystyle=2',
+		'pages':1,
+		'categories':{
+			'speakers': {'name': 'Speakers', 'path': '/?Category=147&displaystyle=2'},
+			'monitors': {'name': 'Monitors', 'path': '/?Category=140&displaystyle=2'},
+			'mobile-amp-systems': {'name': 'Mobile Amps', 'path': '/?Category=146&displaystyle=2'},
+			'install-systems': {'name': 'Fixed Install', 'path': '/?Category=173&displaystyle=2'},
+			'dj-accessories': {'name': 'DJ Accessories', 'path': '/?Category=118&displaystyle=2'},
+			'amplifiers': {'name': 'Amplifiers', 'path': '/?Category=145&displaystyle=2'},
+			'mixers': {'name': 'Mixers', 'path': '/?Category=144&displaystyle=2'},
+			'performance-processors': {'name': 'Performance Processor', 'path': '/?Category=143&displaystyle=2'},
+			'tube-preamp': {'name': 'Tube Preamplifier', 'path': '/?Category=142&displaystyle=2'},
+			'audio': {'name': ' כרטיסי קול וממשקי אודיו', 'path': '/?Category=139&displaystyle=2'},
+			'headphones': {'name': 'אוזניות', 'path': '/?Category=149&displaystyle=2'},
+			'mobile-sp': {'name': 'מקולים ניידים', 'path': '/?Category=176&displaystyle=2'},
+			'mics': {'name': '  מיקרופונים', 'path': '/?Category=121&displaystyle=2'},
+			'mobile-rec': {'name': ' מכשירי הקלטה ניידים', 'path': '/?Category=141&displaystyle=2'},
+			'cat172': {'name': '  נגני מדיה לבמה ולאולפן', 'path': '/?Category=172&displaystyle=2'},
+			'accessories': {'name': ' אביזרים וציוד סאונד היקפי', 'path': '/?Category=148&displaystyle=2'},
+			'stands': {'name': ' סטנדים וארונות מסד לציוד אודיו', 'path': '/?Category=123&displaystyle=2'},
+			'books': {'name': '  ספרי הדרכה ותוכנות לי', 'path': '/?Category=158&displaystyle=2'},
+			'accoustics': {'name': '  אקוסטיקה', 'path': '/?Category=152&displaystyle=2'},
+		}
+	},
+	// 'lightings':{'title':'Lightings',
+	// 	'path':'/?Section=&displaystyle=2',
+	// 	'pages':1,
+	// 	'categories':{'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},},},
+	// 'pianos':{'title':'Keyboards',
+	// 	'path':'/?Section=&displaystyle=2',
+	// 	'pages':1,
+	// 	'categories':{
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 	},},
+	// 'drums':{'title':'Drums',
+	// 	'path':'/?Section=&displaystyle=2',
+	// 	'pages':1,
+	// 	'categories':{
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 	}
+	// 	,},
+	// 'accordions-violens':{'title':'Bands & Orchestras',
+	// 	'path':'/?Section=&displaystyle=2',
+	// 	'pages':1,
+	// 	'categories':{
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 	}},
+	// 'accessories':{'title':'Accessories',
+	// 	'path':'/?Section=&displaystyle=2',
+	// 	'pages':1,
+	// 	'categories':{'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},
+	// 		'': {'name': '', 'path': '/?Category=&displaystyle=2'},}},
 }
 
 var all_products = {}   // this dict will hold all the products mentioned in the categories
@@ -36,13 +144,13 @@ var desired_dom_attrs = {
 	'class': 'ProductDisplayStyle2'
 }
 
-function get_number(str) {
+function get_number(str,default_val) {
 	var price_regex = new RegExp('([0-9]+)', 'g');
 	var found_number = str.replace(',', ''); // if the number has commas...
 	try {
 		found_number = price_regex.exec(found_number)[0];
 	} catch (e) {
-		found_number = null;
+		found_number = default_val;
 	}
 	return found_number
 }
@@ -59,8 +167,8 @@ function get_product_json(product_span, section, category_key) {
 	var product_id = product_url.replace('location.href=\'product.asp?product=', '').replace("';", '')
 	var subdoms = product_span.children[1].children
 	var product_name = subdoms[1].raw
-	var product_price1 = get_number(subdoms[7].children[1].children[0].data)
-	var product_price2 = get_number(subdoms[9].children[1].children[0].data)
+	var product_price1 = get_number(subdoms[7].children[1].children[0].data, ' - ')
+	var product_price2 = get_number(subdoms[9].children[1].children[0].data, ' - ')
 	try {
 		product_img_url = subdoms[3].children[1].children[1].children[1].children[0].attribs['src']
 	} catch (e) {
@@ -192,7 +300,7 @@ function start_category_scan(section, category_key, page, get_all_data) {
 				host: parent_url,
 				port: 80,
 			}
-
+			console.log(category_key)
 			options.path = categories[section].categories[category_key].path + '&Page=' + page;
 
 			var request = http.request(options, function (res) {
@@ -285,8 +393,8 @@ function crawl_data(section_name, category_key, page, get_all_data) {
 function scan_and_save() {
 	var async_promises = []
 	for (var section_name in categories) {
-		for (var i in categories[section_name].categories) {
-			var category = categories[section_name].categories[i];
+		for (var category in categories[section_name].categories) {
+
 			async_promises.push(start_category_scan(section_name, category, 1));
 		}
 	}
@@ -309,7 +417,7 @@ function scan_and_save() {
 		console.log('error ', e)
 	});
 }
-
+scan_and_save()
 exports.parent_url = parent_url;        // tested
 exports.categories = categories;        // tested
 exports.scan_and_save = scan_and_save;
