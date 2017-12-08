@@ -5,7 +5,9 @@ var httpRequest = {
 
 		return (new Promise(function (resolve, reject) {
 			http.get(url, function (res) {
-				assert.equal(200, res.statusCode);
+				if(200!= res.statusCode){
+					reject(url)
+				}
 				resolve(res);
 			});
 		}));
