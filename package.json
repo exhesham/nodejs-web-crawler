@@ -1,6 +1,6 @@
 {
   "name": "kz-crawler",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": false,
   "author": "exhesham",
   "repository": "https://github.com/exhesham/nodejs-web-crawler",
